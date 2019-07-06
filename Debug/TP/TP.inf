@@ -1,0 +1,86 @@
+;
+; TP.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=TP.cat
+DriverVer = 07/06/2019,17.39.0.457
+
+[DestinationDirs]
+DefaultDestDir = 12
+TP_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+TP.sys  = 1,,
+WdfCoInstaller01009.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NTx86
+
+[Standard.NTx86]
+%TP.DeviceDesc%=TP_Device, Root\TP ; TODO: edit hw-id
+
+[TP_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+TP.sys
+
+;-------------- Service installation
+[TP_Device.NT.Services]
+AddService = TP,%SPSVCINST_ASSOCSERVICE%, TP_Service_Inst
+
+; -------------- TP driver install sections
+[TP_Service_Inst]
+DisplayName    = %TP.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\TP.sys
+
+;
+;--- TP_Device Coinstaller installation ------
+;
+
+[TP_Device.NT.CoInstallers]
+AddReg=TP_Device_CoInstaller_AddReg
+CopyFiles=TP_Device_CoInstaller_CopyFiles
+
+[TP_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller01009.dll,WdfCoInstaller"
+
+[TP_Device_CoInstaller_CopyFiles]
+WdfCoInstaller01009.dll
+
+[TP_Device.NT.Wdf]
+KmdfService =  TP, TP_wdfsect
+[TP_wdfsect]
+KmdfLibraryVersion = 1.9
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "TP Installation Disk"
+TP.DeviceDesc = "TP Device"
+TP.SVCDESC = "TP Service"
